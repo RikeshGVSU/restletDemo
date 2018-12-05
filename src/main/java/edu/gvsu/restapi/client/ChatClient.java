@@ -12,6 +12,7 @@ import java.rmi.RemoteException;
 import java.util.Scanner;
 import java.util.Vector;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Client;
@@ -35,7 +36,8 @@ public class ChatClient
 {
 
 	// The base URL for all requests.
-    public static final String APPLICATION_URI = "https://8080-dot-4937445-dot-devshell.appspot.com";
+    //public static final String APPLICATION_URI = "https://8080-dot-4937445-dot-devshell.appspot.com";
+    public static final String APPLICATION_URI = "http://localhost:8080";
 	//PresenceService nameServer;
     ServerSocket serviceSkt = null;
     SvrThread svrThread;
@@ -95,11 +97,11 @@ public class ChatClient
 	    request.setEntity(form.getWebRepresentation());
 
 	    // Invoke the client HTTP connector to send the POST request to the server.
-	    System.out.println("Sending an HTTP POST to " + widgetsResourceURL + ".");
+	    //System.out.println("Sending an HTTP POST to " + widgetsResourceURL + ".");
 	    Response resp = new Client(Protocol.HTTP).handle(request);
 
 	    // now, let's check what we got in response.
-	    System.out.println(resp.getStatus());
+	    //System.out.println(resp.getStatus());
 	    Representation responseData = resp.getEntity();
 	    try {
 			System.out.println(responseData.getText());
@@ -193,21 +195,14 @@ public class ChatClient
                 			Representation responseData = resp.getEntity();
                 			System.out.println("Status = " + resp.getStatus());
                 			try {
-                				StringBuilder jsonString= new StringBuilder(responseData.getText().toString());
+                				String jsonString= responseData.getText().toString();
                 				System.out.println("result text=" + jsonString);
-                				JSONObject jObj = new JSONObject(responseData.getText().toString());
-                				System.out.println(jObj);
-                					//System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
-
-//                				while(keys.hasNext()) {
-//                					System.out.println("has nw=ext json");s
-//                				    String key = keys.next();
-//                				    //if (jObj.get(key) instanceof JSONObject) {
-//                				    	System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
-                //
-//                				    //}
-//                				}
-                				//System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
+                				//JSONObject jObj = new JSONObject(responseData.getText().toString());
+                				JSONArray jsonArray = new JSONArray(jsonString);
+                				for (int i = 0; i < jsonArray.length(); i++) {
+                					JSONObject jObj = jsonArray.getJSONObject(i);
+                					System.out.println("name=" + jObj.getString("userName") + " status=" + jObj.getBoolean("status"));
+                				}
                 			} catch (IOException e) {
                 				// TODO Auto-generated catch block
                 				e.printStackTrace();
@@ -237,36 +232,18 @@ public class ChatClient
                 		if(resp.getStatus().equals(Status.SUCCESS_OK)) {
                 			Representation responseData = resp.getEntity();
                 			System.out.println("Status = " + resp.getStatus());
-//                			try {
-//                				String jsonString= responseData.getText().toString();
-//                				System.out.println("result text=" + jsonString);
-//                				JSONObject jObj = new JSONObject(responseData.getText().toString());
-//                				System.out.println(jObj);
-//                					//System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
-                //
-////                				while(keys.hasNext()) {
-////                					System.out.println("has nw=ext json");s
-////                				    String key = keys.next();
-////                				    //if (jObj.get(key) instanceof JSONObject) {
-////                				    	System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
-                ////
-////                				    //}
-////                				}
-//                				//System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
-//                			} catch (IOException e) {
-//                				// TODO Auto-generated catch block
-//                				e.printStackTrace();
-//                			} catch (JSONException je) {
-//                				je.printStackTrace();
-//                			}
-	                		//TODO: 
-	                				 Vector<RegistrationInfo> clients = null;
-	                        if(clients != null) {
-	                            System.out.println("\nBroadcasting to the following users:\n");
-	                            for(RegistrationInfo client : clients) {
-	                                String userName = client.getUserName();
+                			try {
+	            				String jsonString= responseData.getText().toString();
+	            				System.out.println("result text=" + jsonString);
+	            				//JSONObject jObj = new JSONObject(responseData.getText().toString());
+	            				JSONArray jsonArray = new JSONArray(jsonString);
+	            				for (int i = 0; i < jsonArray.length(); i++) {
+	            					JSONObject jObj = jsonArray.getJSONObject(i);
+	            					System.out.println("name=" + jObj.getString("userName") + " status=" + jObj.getBoolean("status"));
+	            					String userName = jObj.getString("userName");
 	                                // Don't broadcast to the local client!
 	                                if(!userName.equals(this.regInfo.getUserName())) {
+	                                	RegistrationInfo client = new RegistrationInfo(userName,jObj.getString("host"),jObj.getInt("port"),jObj.getBoolean("status"));
 	                                    System.out.print("Sending message to " + userName + " ... " );
 	                                    if(!this.sendMsgToKnownUser(client, msg)) {
 	                                        System.out.println("failed (unavailable).");
@@ -274,10 +251,13 @@ public class ChatClient
 	                                        System.out.println("Done!");
 	                                    }
 	                                }
-	                             }
-	                        } else {
-	                            System.out.println("No users to broadcast to.\n");
-	                        }
+	            				}
+	            			} catch (IOException e) {
+	            				// TODO Auto-generated catch block
+	            				e.printStackTrace();
+	            			} catch (JSONException je) {
+	            				je.printStackTrace();
+	            			}
                 		}
                         
                     } else if(cmd.toLowerCase().trim().startsWith("busy")) { 
