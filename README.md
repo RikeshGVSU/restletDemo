@@ -26,3 +26,6 @@ To deploy the example to Google AppEngine, enter this maven command:
 If successful, you can now point your favorite web browser / API fetcher at ```http://your-appengine-property-id-goes-here.appspot.com``` to
 access the API. (replace ```your-appengine-property-id-goes-here``` with your Google AppEngine property id). 
 # restletDemo
+
+### Run Client
+mvn exec:java -Dexec.mainClass=edu.gvsu.restapi.client.ChatClient
