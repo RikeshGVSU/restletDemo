@@ -36,8 +36,8 @@ public class ChatClient
 {
 
 	// The base URL for all requests.
-    //public static final String APPLICATION_URI = "https://8080-dot-4937445-dot-devshell.appspot.com";
-    public static final String APPLICATION_URI = "http://localhost:8080";
+    public static final String APPLICATION_URI = "https://cis656lab5-224401.appspot.com";
+//    public static final String APPLICATION_URI = "http://localhost:8080";
 	//PresenceService nameServer;
     ServerSocket serviceSkt = null;
     SvrThread svrThread;
@@ -80,7 +80,7 @@ public class ChatClient
 
         System.out.println("Registering...");
 
-     // EXAMPLE HTTP REQUEST #1 - Let's create a new widget!
+     // EXAMPLE HTTP REQUEST #1 - Let's create a new user!
 		// This is how you create a www form encoded entity for the HTTP POST request.
         int port = this.serviceSkt.getLocalPort();
         regInfo = new RegistrationInfo(uname,myHost,port,true);
@@ -90,38 +90,25 @@ public class ChatClient
 	    form.add("port",Integer.toString(port));
 
 	    // construct request to create a new user resource
-	    String widgetsResourceURL = APPLICATION_URI + "/users";
-	    Request request = new Request(Method.POST,widgetsResourceURL);
+	    String userResourceURL = APPLICATION_URI + "/users";
+	    Request request = new Request(Method.POST,userResourceURL);
 
 	    // set the body of the HTTP POST command with form data.
 	    request.setEntity(form.getWebRepresentation());
 
 	    // Invoke the client HTTP connector to send the POST request to the server.
-	    //System.out.println("Sending an HTTP POST to " + widgetsResourceURL + ".");
+	    //System.out.println("Sending an HTTP POST to " + userResourceURL + ".");
 	    Response resp = new Client(Protocol.HTTP).handle(request);
 
 	    // now, let's check what we got in response.
 	    //System.out.println(resp.getStatus());
 	    Representation responseData = resp.getEntity();
-	    try {
-			System.out.println(responseData.getText());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        // Step 4. register the client with the presence service to advertise it
-        // is available for chatting.
-//        try {
-//            if(!this.nameServer.register(this.regInfo)) {
-//                System.out.println("Sorry, that username is already taken.  Please try another.");
-//                System.exit(1);
-//            }
-//        } catch (RemoteException e) {
-//            e.printStackTrace();
-//            System.out.println("Error: Failed to register with name service.");
-//            System.exit(1);
-//        }
+//	    try {
+//			System.out.println(responseData.getText());
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
         // Step 5. Kick off a separate thread to listen to incoming requests on the
         // Server socket.
@@ -181,14 +168,14 @@ public class ChatClient
 
                     } else if(cmd.toLowerCase().trim().startsWith("friends")) {
 
-                    	String widgetsResourceURL = APPLICATION_URI + "/users";
-                    	Request request = new Request(Method.GET,widgetsResourceURL);
+                    	String userResourceURL = APPLICATION_URI + "/users";
+                    	Request request = new Request(Method.GET,userResourceURL);
                 	    
                 	    request.getClientInfo().getAcceptedMediaTypes().
                         add(new Preference(MediaType.APPLICATION_JSON));
 
                 	    // Now we do the HTTP GET
-                	    System.out.println("Sending an HTTP DELETE to " + widgetsResourceURL + ".");
+                	    System.out.println("Sending an HTTP DELETE to " + userResourceURL + ".");
                 	    Response resp = new Client(Protocol.HTTP).handle(request);
                 		
                 		if(resp.getStatus().equals(Status.SUCCESS_OK)) {
@@ -196,12 +183,12 @@ public class ChatClient
                 			System.out.println("Status = " + resp.getStatus());
                 			try {
                 				String jsonString= responseData.getText().toString();
-                				System.out.println("result text=" + jsonString);
-                				//JSONObject jObj = new JSONObject(responseData.getText().toString());
+                				//System.out.println("result text=" + jsonString);
                 				JSONArray jsonArray = new JSONArray(jsonString);
                 				for (int i = 0; i < jsonArray.length(); i++) {
                 					JSONObject jObj = jsonArray.getJSONObject(i);
-                					System.out.println("name=" + jObj.getString("userName") + " status=" + jObj.getBoolean("status"));
+                					String status = jObj.getBoolean("status")? "Available":"Busy";
+                					System.out.println("name: " + jObj.getString("userName") + " - " + status);
                 				}
                 			} catch (IOException e) {
                 				// TODO Auto-generated catch block
@@ -219,14 +206,14 @@ public class ChatClient
                             continue;
                         }
                         String msg = cmd.substring(pos+1);
-                        String widgetsResourceURL = APPLICATION_URI + "/users";
-                    	Request request = new Request(Method.GET,widgetsResourceURL);
+                        String userResourceURL = APPLICATION_URI + "/users";
+                    	Request request = new Request(Method.GET,userResourceURL);
                 	    
                 	    request.getClientInfo().getAcceptedMediaTypes().
                         add(new Preference(MediaType.APPLICATION_JSON));
 
                 	    // Now we do the HTTP GET
-                	    System.out.println("Sending an HTTP DELETE to " + widgetsResourceURL + ".");
+                	    System.out.println("Sending an HTTP DELETE to " + userResourceURL + ".");
                 	    Response resp = new Client(Protocol.HTTP).handle(request);
                 		
                 		if(resp.getStatus().equals(Status.SUCCESS_OK)) {
@@ -234,7 +221,7 @@ public class ChatClient
                 			System.out.println("Status = " + resp.getStatus());
                 			try {
 	            				String jsonString= responseData.getText().toString();
-	            				System.out.println("result text=" + jsonString);
+	            				//System.out.println("result text=" + jsonString);
 	            				//JSONObject jObj = new JSONObject(responseData.getText().toString());
 	            				JSONArray jsonArray = new JSONArray(jsonString);
 	            				for (int i = 0; i < jsonArray.length(); i++) {
@@ -264,19 +251,19 @@ public class ChatClient
                     	 Form form = new Form();
                  	    form.add("userInput","busy");
 
-                 	    // construct request to create a new widget resource
-                 	    String widgetsResourceURL = APPLICATION_URI + "/users/" + this.regInfo.getUserName();
-                 	    Request request = new Request(Method.PUT,widgetsResourceURL);
+                 	    // construct request to create a new user resource
+                 	    String userResourceURL = APPLICATION_URI + "/users/" + this.regInfo.getUserName();
+                 	    Request request = new Request(Method.PUT,userResourceURL);
 
-//                 	    // set the body of the HTTP PUT command with form data
+                 	    // set the body of the HTTP PUT command with form data
                  	    request.setEntity(form.getWebRepresentation());
-                 //
-//                 	    // Invoke the client HTTP connector to send the POST request to the server.
-//                 	    System.out.println("Sending an HTTP PUT to " + widgetsResourceURL + ".");
+                 
+                 	    // Invoke the client HTTP connector to send the POST request to the server.
+                 	    System.out.println("Sending an HTTP PUT to " + userResourceURL + ".");
                  	    Response resp = new Client(Protocol.HTTP).handle(request);
-                 //
-//                 	    // now, let's check what we got in response.
-//                 	    System.out.println(resp.getStatus());
+                 
+                 	    // now, let's check what we got in response.
+                 	    System.out.println(resp.getStatus());
                  	   Representation responseData = resp.getEntity();
                  	    try {
                  			System.out.println(responseData.getText());
@@ -289,20 +276,20 @@ public class ChatClient
                     	Form form = new Form();
                  	    form.add("userInput","available");
 
-                 	    // construct request to create a new widget resource
-                 	    String widgetsResourceURL = APPLICATION_URI + "/users/" + this.regInfo.getUserName();
-                 	    Request request = new Request(Method.PUT,widgetsResourceURL);
+                 	    // construct request to create a new user resource
+                 	    String userResourceURL = APPLICATION_URI + "/users/" + this.regInfo.getUserName();
+                 	    Request request = new Request(Method.PUT,userResourceURL);
 
 
-                 	    // set the body of the HTTP POST command with form dat
+                 	    // set the body of the HTTP POST command with form data
                  	    request.setEntity(form.getWebRepresentation());
 
                  	    // Invoke the client HTTP connector to send the POST request to the server.
-//                 	    System.out.println("Sending an HTTP POST to " + widgetsResourceURL + ".");
+                 	    //System.out.println("Sending an HTTP POST to " + userResourceURL + ".");
                  	    Response resp = new Client(Protocol.HTTP).handle(request);
 
                  	    // now, let's check what we got in response.
-//                 	    System.out.println(resp.getStatus());
+                 	    //System.out.println(resp.getStatus());
                  	   Representation responseData = resp.getEntity();
                  	    try {
                  			System.out.println(responseData.getText());
@@ -314,15 +301,18 @@ public class ChatClient
 
                     } else if(cmd.toLowerCase().trim().startsWith("exit")) {
 
-                    	String widgetsResourceURL = APPLICATION_URI + "/users/NewTest2";
-                	    Request request = new Request(Method.DELETE,widgetsResourceURL);
+                    	String userResourceURL = APPLICATION_URI + "/users/" + this.regInfo.getUserName();
+                	    Request request = new Request(Method.DELETE,userResourceURL);
                 	    
                 	    request.getClientInfo().getAcceptedMediaTypes().
                         add(new Preference(MediaType.APPLICATION_JSON));
                 
                 	    // Now we do the HTTP GET
-                	    System.out.println("Sending an HTTP DELETE to " + widgetsResourceURL + ".");
+                	    System.out.println("Sending an HTTP DELETE to " + userResourceURL + ".");
                 		Response resp = new Client(Protocol.HTTP).handle(request);
+                		System.out.println("Have a good day!");
+                		done = true;
+                		System.exit(0);
                     } else {
                         System.out.println("Hmm, not sure what you meant there. Try again.");
                     }
@@ -342,40 +332,38 @@ public class ChatClient
      */
     private boolean lookupAndSendMsg(String userName, String msg)
     {
-        boolean retval = true;
+        boolean retval = false;
         RegistrationInfo regInfSendMsg = null;
-        String widgetsResourceURL = APPLICATION_URI + "/users/" + userName;
-		Request request = new Request(Method.GET,widgetsResourceURL);
+        String userResourceURL = APPLICATION_URI + "/users/" + userName;
+		Request request = new Request(Method.GET,userResourceURL);
    
 		// We need to ask specifically for JSON
 		request.getClientInfo().getAcceptedMediaTypes().
 		add(new Preference(MediaType.APPLICATION_JSON));
    
 		// Now we do the HTTP GET
-		System.out.println("Sending an HTTP GET to " + widgetsResourceURL + ".");
+		//System.out.println("Sending an HTTP GET to " + userResourceURL + ".");
 		Response resp = new Client(Protocol.HTTP).handle(request);
    
 		// Let's see what we got!
 		if(resp.getStatus().equals(Status.SUCCESS_OK)) {
 			Representation responseData = resp.getEntity();
-			System.out.println("Status = " + resp.getStatus());
+			//System.out.println("Status = " + resp.getStatus());
 			
 			try {
 				String jsonString = responseData.getText().toString();
-				System.out.println("result text=" + jsonString);
+				//System.out.println("result text=" + jsonString);
 				JSONObject jObj = new JSONObject(jsonString);
-				regInfSendMsg = new RegistrationInfo(jObj.getString("userName"),jObj.getString("host"),jObj.getInt("port"),jObj.getBoolean("status"));
-				System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
+				if (jObj.has("userName")) {
+					regInfSendMsg = new RegistrationInfo(jObj.getString("userName"),jObj.getString("host"),jObj.getInt("port"),jObj.getBoolean("status"));
+					retval = this.sendMsgToKnownUser(regInfSendMsg, msg);
+					}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (JSONException je) {
 				je.printStackTrace();
 			}
 		}
-		
-		// look up this user's registration info so we can send message.
-		retval = this.sendMsgToKnownUser(regInfSendMsg, msg);
         return retval;
     }
     

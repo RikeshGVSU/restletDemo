@@ -3,6 +3,7 @@ package edu.gvsu.restapi.client;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Client;
@@ -28,32 +29,32 @@ public class SampleRESTClient
     	
 
 		// EXAMPLE HTTP REQUEST #1 - Let's create a new widget!
-//		// This is how you create a www form encoded entity for the HTTP POST request.
-//	    Form form = new Form();
-//	    form.add("userInput","NewTest4");
-//	    form.add("host","myHost4");
-//	    form.add("port","104");
-//
+		// This is how you create a www form encoded entity for the HTTP POST request.
+	    Form form = new Form();
+	    form.add("userInput","NewTest2");
+	    form.add("host","myHost2");
+	    form.add("port","102");
+
 	    // construct request to create a new widget resource
 	    String widgetsResourceURL = APPLICATION_URI + "/users";
 	    Request request = new Request(Method.POST,widgetsResourceURL);
 
-//	    // set the body of the HTTP POST command with form data.
-//	    request.setEntity(form.getWebRepresentation());
-//
-//	    // Invoke the client HTTP connector to send the POST request to the server.
-//	    System.out.println("Sending an HTTP POST to " + widgetsResourceURL + ".");
+	    // set the body of the HTTP POST command with form data.
+	    request.setEntity(form.getWebRepresentation());
+
+	    // Invoke the client HTTP connector to send the POST request to the server.
+	    System.out.println("Sending an HTTP POST to " + widgetsResourceURL + ".");
 	    Response resp = new Client(Protocol.HTTP).handle(request);
-//
-//	    // now, let's check what we got in response.
-//	    System.out.println(resp.getStatus());
+
+	    // now, let's check what we got in response.
+	    System.out.println(resp.getStatus());
 	    Representation responseData = resp.getEntity();
-//	    try {
-//			System.out.println(responseData.getText());
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+	    try {
+			System.out.println(responseData.getText());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 
 
@@ -126,10 +127,15 @@ public class SampleRESTClient
 			try {
 				String jsonString= responseData.getText().toString();
 				System.out.println("result text=" + jsonString);
-				JSONObject jObj = new JSONObject(responseData.getText().toString());
-				System.out.println(jObj);
-					//System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
-
+				//JSONObject jObj = new JSONObject(responseData.getText().toString());
+				JSONArray jsonArray = new JSONArray(jsonString);
+				for (int i = 0; i < jsonArray.length(); i++) {
+					JSONObject jObj = jsonArray.getJSONObject(i);
+//					String userName = jObj.getString("userName");
+//					System.out.println(jObj);
+				
+					System.out.println("name=" + jObj.getString("userName") + " host=" + jObj.getString("host") + " port=" + jObj.getInt("port") + " status=" + jObj.getBoolean("status"));
+				}
 //				while(keys.hasNext()) {
 //					System.out.println("has nw=ext json");s
 //				    String key = keys.next();
